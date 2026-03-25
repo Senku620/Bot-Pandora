@@ -30,10 +30,10 @@ from openai import OpenAI
 load_dotenv()
 
 # API ключи для Telegram бота и AI
-BOT_TOKEN = '8456744219:AAEq_AWH1rfEz_PGtuLmjdQj34wbcJq2DXI'
-API_KEY = '595cdf7e-da8e-443f-b27d-73fc62125245'
-AI_BASE_URL = 'https://api.sambanova.ai/v1'
-AI_MODEL = 'Meta-Llama-3.3-70B-Instruct'
+BOT_TOKEN = ''
+API_KEY = ''
+AI_BASE_URL = ''
+AI_MODEL = ''
 
 # Инициализация бота и диспетчера событий
 bot = Bot(token=BOT_TOKEN)
