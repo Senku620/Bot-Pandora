@@ -1,0 +1,71 @@
+{
+  "users": {
+    "1134407184": {
+      "user_id": 1134407184,
+      "username": "Senku_Sultan",
+      "first_name": "Sultan",
+      "last_name": "Не указано",
+      "first_interaction": "2026-02-26T21:44:32.006385",
+      "last_interaction": "2026-02-26T21:48:21.116651",
+      "total_messages": 3,
+      "sessions": [],
+      "satisfaction_ratings": [],
+      "most_used_intents": {
+        "приветствие": 1,
+        "депрессия": 1
+      },
+      "ai_requests_count": 1,
+      "commands_used": {
+        "start": 2
+      },
+      "buttons_clicked": {
+        "start_talk": 1
+      }
+    },
+    "1629971895": {
+      "user_id": 1629971895,
+      "username": "gegonnogeg",
+      "first_name": "gegonnogeg",
+      "last_name": "Не указано",
+      "first_interaction": "2026-02-26T21:51:29.250958",
+      "last_interaction": "2026-02-26T21:51:59.527688",
+      "total_messages": 2,
+      "sessions": [],
+      "satisfaction_ratings": [],
+      "most_used_intents": {},
+      "ai_requests_count": 2,
+      "commands_used": {
+        "start": 1
+      },
+      "buttons_clicked": {
+        "start_talk": 1
+      }
+    },
+    "5279370318": {
+      "user_id": 5279370318,
+      "username": "Zwe1hand4Trap",
+      "first_name": "ㅤㅤ",
+      "last_name": "ㅤㅤㅤㅤㅤㅤㅤㅤㅤ",
+      "first_interaction": "2026-02-26T21:51:34.710831",
+      "last_interaction": "2026-02-26T21:52:28.744015",
+      "total_messages": 2,
+      "sessions": [],
+      "satisfaction_ratings": [],
+      "most_used_intents": {},
+      "ai_requests_count": 2,
+      "commands_used": {
+        "start": 1
+      },
+      "buttons_clicked": {
+        "start_talk": 1
+      }
+    }
+  },
+  "global_stats": {
+    "total_users": 3,
+    "total_sessions": 0,
+    "total_messages": 7,
+    "average_session_duration": 0,
+    "average_satisfaction_rating": 0
+  }
+}
