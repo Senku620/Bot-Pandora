@@ -41,17 +41,8 @@ pandora-bot/
 ├── bot.py               # All bot logic (single file)
 ├── intents.json         # Intent patterns & responses (48 intents)
 ├── user_stats.json      # User statistics (auto-generated)
-├── tests/
-│   └── test_bot.py      # Unit tests
 ├── .env.example         # Environment variable template
 ├── requirements.txt     # Production dependencies
-├── requirements-dev.txt # Dev/test dependencies
-├── pyproject.toml       # Ruff & pytest config
-├── Dockerfile
-├── docker-compose.yml
-├── .github/workflows/ci.yml
-├── CONTRIBUTING.md
-└── LICENSE              # MIT
 ```
 
 ## 🚀 Quick Start
