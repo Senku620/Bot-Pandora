@@ -1,124 +1,150 @@
-# Bot-Pandora# 🤖 Telegram-бот "Пандора" — AI-терапевт помощник
+<div align="center">
 
-> Гибридный чат-бот психологической поддержки с двумя режимами работы: база знаний (intents) и генеративный искусственный интеллект.
+# 🔮 Pandora Bot
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python)
-![Aiogram](https://img.shields.io/badge/aiogram-3.x-green?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
-![AI](https://img.shields.io/badge/AI-Llama--3.3--70B-orange?style=flat-square)
+**AI-powered therapeutic assistant for Telegram**
 
----
+[![CI](https://github.com/YOUR_USERNAME/pandora-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/pandora-bot/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![aiogram 3](https://img.shields.io/badge/aiogram-3.x-blue.svg)](https://docs.aiogram.dev/)
 
-## 📋 Оглавление
+*A hybrid Telegram bot providing psychological support through pattern-matched responses and AI-generated conversations powered by Meta-Llama 3.3 70B.*
 
-- [✨ Особенности](#-особенности)
-- [🛠 Технологический стек](#-технологический-стек)
-- [🚀 Быстрый старт](#-быстрый-старт)
-- [⚙️ Конфигурация](#️-конфигурация)
-- [📁 Структура проекта](#-структура-проекта)
-- [💬 Команды бота](#-команды-ботоа)
-- [📊 Система статистики](#-система-статистики)
-- [🧠 Как работает AI](#-как-работает-ai)
-- [🔧 Разработка и расширение](#-разработка-и-расширение)
-- [⚠️ Важные предупреждения](#️-важные-предупреждения)
-- [🤝 Вклад в проект](#-вклад-в-проект)
-- [📄 Лицензия](#-лицензия)
+</div>
 
 ---
 
-## ✨ Особенности
+## ✨ Features
 
-### 🎯 Основные возможности✅ Эмпатичный диалог о чувствах и эмоциях
-✅ Техники релаксации: дыхание, медитация, заземление
-✅ Отслеживание настроения и рефлексия
-✅ Контакты экстренной психологической помощи
-✅ Анонимность и конфиденциальность
-✅ Работа 24/7 без ожидания
+| Feature | Description |
+|---------|-------------|
+| 🤖 **Hybrid AI** | Pattern-matching for simple queries + LLM for deep conversations |
+| 🧘 **Guided Exercises** | Breathing, meditation, muscle relaxation, grounding techniques |
+| 📊 **User Statistics** | Tracks interactions, message counts, session duration |
+| ⭐ **Rating System** | In-bot 1–10 rating with persistent JSON storage |
+| 📞 **Crisis Resources** | Quick access to mental health hotline numbers |
+| 💬 **Conversation Memory** | Per-user chat history for contextual AI responses |
 
-### 🔄 Гибридная архитектура
-| Режим | Когда используется | Преимущества |
-|-------|-------------------|--------------|
-| Intents (JSON) | Простые запросы: приветствие, благодарность, команды | ⚡ Мгновенный ответ, 100% предсказуемость |
-| AI (Llama 3.3) | Сложные диалоги, эмоциональные запросы | 🧠 Контекстное понимание, эмпатия, адаптивность |
+## 🏗️ Tech Stack
 
-### 🛡️ Надёжность
-- Graceful Degradation: При недоступности AI бот автоматически переключается на режим работы с базой знаний
-- Асинхронность: Обработка множества пользователей одновременно без блокировок
-- Таймаут сессий: Автоматическое завершение неактивных диалогов (>30 мин)
+- **Runtime:** Python 3.11+
+- **Telegram:** [aiogram 3.x](https://docs.aiogram.dev/) (async)
+- **AI:** [SambaNova API](https://sambanova.ai/) — Meta-Llama 3.3 70B via OpenAI SDK (async)
+- **NLP:** `difflib` fuzzy matching for intent detection
+- **Container:** Docker & Docker Compose
 
----
+## 📁 Project Structure
 
-## 🛠 Технологический стек
-Core:
-  - Python 3.10+
-  - aiogram 3.x          # Асинхронный Telegram Bot API
-  - asyncio              # Асинхронное программирование
+```
+pandora-bot/
+├── bot.py               # All bot logic (single file)
+├── intents.json         # Intent patterns & responses (48 intents)
+├── user_stats.json      # User statistics (auto-generated)
+├── tests/
+│   └── test_bot.py      # Unit tests
+├── .env.example         # Environment variable template
+├── requirements.txt     # Production dependencies
+├── requirements-dev.txt # Dev/test dependencies
+├── pyproject.toml       # Ruff & pytest config
+├── Dockerfile
+├── docker-compose.yml
+├── .github/workflows/ci.yml
+├── CONTRIBUTING.md
+└── LICENSE              # MIT
+```
 
-AI & NLP:
-  - openai SDK           # Универсальный клиент для LLM API
-  - SambaNova Cloud      # Хостинг Meta-Llama-3.3-70B-Instruct
-  - difflib              # Нечёткое сопоставление текстов
+## 🚀 Quick Start
 
-Config & Utils:
-  - python-dotenv        # Управление переменными окружения
-  - json                 # Хранение интентов и статистики
-  - random               # Рандомизация ответов из базы
+### Prerequisites
 
----
+- Python 3.11+
+- A Telegram Bot token from [@BotFather](https://t.me/BotFather)
+- A SambaNova API key (or any OpenAI-compatible endpoint)
 
-## 🚀 Быстрый старт
+### 1. Clone & Configure
 
-### 1️⃣ Клонирование репозиторияgit clone https://github.com/your-username/pandora-bot.git
+```bash
+git clone https://github.com/YOUR_USERNAME/pandora-bot.git
 cd pandora-bot
+cp .env.example .env
+```
 
-### 2️⃣ Создание виртуального окружения# Linux/macOS
-python -m venv venv
-source venv/bin/activate
+Edit `.env`:
 
+```ini
+BOT_TOKEN=your-telegram-bot-token
+AI_API_KEY=your-sambanova-api-key
+```
+
+### 2a. Run Locally
+
+```bash
+python -m venv .venv
 # Windows
-python -m venv venv
-venv\Scripts\activate
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
 
-### 3️⃣ Установка зависимостейpip install -r requirements.txt
+pip install -r requirements.txt
+python bot.py
+```
 
-### 4️⃣ Настройка переменных окружения
-Создайте файл .env в корне проекта:cp .env.example .env
+### 2b. Run with Docker
 
-Заполните его своими данными (см. раздел [⚙️ Конфигурация](#️-конфигурация)).
+```bash
+docker compose up -d --build
+```
 
-### 5️⃣ Запуск ботаpython main.py
+### 3. Talk to Your Bot
 
-🎉 Бот запущен! Найдите его в Telegram по токенам или пригласите в чат.
+Open Telegram, find your bot, send `/start`.
 
----
+## 🧪 Testing
 
-## ⚙️ Конфигурация
+```bash
+pip install -r requirements-dev.txt
+pytest tests/ -v --cov=.
+```
 
-### Файл .env
-# Telegram Bot Token (получить у @BotFather)
-BOT_TOKEN=123456789:AAHdashUIOqweqweqweqweqweqweqwe
+## 🔧 Configuration
 
-# SambaNova API Key (https://cloud.sambanova.ai/)
-API_KEY=your-sambanova-api-key-here
+All settings via environment variables (or `.env`):
 
-# AI Endpoint (по умолчанию)
-AI_BASE_URL=https://api.sambanova.ai/v1
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `BOT_TOKEN` | ✅ | — | Telegram bot token |
+| `AI_API_KEY` | ✅ | — | SambaNova / OpenAI-compatible API key |
+| `AI_BASE_URL` | ❌ | `https://api.sambanova.ai/v1` | AI endpoint URL |
+| `AI_MODEL` | ❌ | `Meta-Llama-3.3-70B-Instruct` | Model identifier |
+| `MAX_HISTORY` | ❌ | `8` | Max conversation pairs kept in memory |
+| `SESSION_TIMEOUT` | ❌ | `1800` | Session timeout (seconds) |
 
-# Модель (по умолчанию)
-AI_MODEL=Meta-Llama-3.3-70B-Instruct
+## 📝 Intent System
 
-### Файл intents.json
-Структура базы знаний для простых ответов:{
-  "intents": [
-    {
-      "tag": "приветствие",
-      "patterns": ["привет", "здравствуйте", "добрый день"],
-      "responses": [
-        "Здравствуйте! 🌸 Как я могу вам помочь сегодня?",
-        "Привет! Рада вас видеть. Расскажите, как ваше настроение?"
-      ]
-    }
-  ]
+Two-tier response strategy:
+
+1. **Pattern Matching** — messages compared against `intents.json` (exact + fuzzy via `difflib`, cutoff 0.6)
+2. **AI Fallback** — unmatched messages go to the LLM with conversation history
+
+Add new intents by editing `intents.json`:
+
+```json
+{
+  "tag": "your_tag",
+  "patterns": ["сообщение 1", "сообщение 2"],
+  "responses": ["ответ 1", "ответ 2"]
 }
+```
 
-> 💡 Совет: Добавляйте
+## ⚠️ Disclaimer
+
+This bot is **not a substitute for professional mental health care**. It is a supportive tool only. If you or someone you know is in crisis, contact a qualified professional or emergency services.
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📄 License
+
+[MIT](LICENSE)
