@@ -1,60 +1,82 @@
 """
-Telegram-бот "Пандора" - AI Терапевт-помощник
+Telegram-бот "Пандора" — AI Терапевт-помощник
 ==============================================
 Гибридный бот психологической поддержки с двумя режимами работы:
-1. Базовые ответы из intents.json для простых запросов
-2. AI-генерация через Meta-Llama 3.3 70B для сложных диалогов
+  1. Базовые ответы из intents.json для простых запросов
+  2. AI-генерация через Meta-Llama 3.3 70B для сложных диалогов
 
 Технологии:
-- aiogram 3.x - асинхронная работа с Telegram API
-- OpenAI SDK - подключение к AI
-- difflib - нечеткое сопоставление текстовых паттернов
+  - aiogram 3.x — асинхронная работа с Telegram API
+  - OpenAI SDK  — подключение к AI (async)
+  - difflib     — нечёткое сопоставление текстовых паттернов
 """
 
 import os
+import sys
 import json
 import random
 import asyncio
+import logging
 import time
 from datetime import datetime
+from pathlib import Path
+
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from difflib import get_close_matches
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AsyncOpenAI
 
+# =============================================
+# ЛОГИРОВАНИЕ
+# =============================================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(message)s",
+    stream=sys.stdout,
+)
+logger = logging.getLogger(__name__)
 
+# =============================================
 # КОНФИГУРАЦИЯ И ИНИЦИАЛИЗАЦИЯ
-# Загрузка переменных окружения из .env файла
+# =============================================
 load_dotenv()
 
-# API ключи для Telegram бота и AI
-BOT_TOKEN = ''
-API_KEY = ''
-AI_BASE_URL = ''
-AI_MODEL = ''
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+API_KEY = os.getenv("AI_API_KEY", "")
+AI_BASE_URL = os.getenv("AI_BASE_URL", "https://api.sambanova.ai/v1")
+AI_MODEL = os.getenv("AI_MODEL", "Meta-Llama-3.3-70B-Instruct")
 
-# Инициализация бота и диспетчера событий
+if not BOT_TOKEN:
+    sys.exit("BOT_TOKEN не задан. Скопируйте .env.example → .env и заполните значения.")
+
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Попытка подключения к AI сервису
-try:
-    ai_client = OpenAI(
-        base_url=AI_BASE_URL,
-        api_key=API_KEY
-    )
-    AI_ENABLED = True
-except:
-    AI_ENABLED = False
-    print("AI отключен. Работаем только с intents.json")
+# Попытка подключения к AI сервису (async-клиент)
+AI_ENABLED = False
+ai_client = None
+if API_KEY:
+    try:
+        ai_client = AsyncOpenAI(base_url=AI_BASE_URL, api_key=API_KEY)
+        AI_ENABLED = True
+    except Exception as exc:
+        logger.warning("Не удалось инициализировать AI: %s", exc)
+else:
+    logger.warning("AI_API_KEY не задан — AI-функции отключены")
 
 # Словарь для хранения истории диалогов каждого пользователя
-conversation_history = {}
+conversation_history: dict[int, list[dict]] = {}
 
 # Максимальное количество пар сообщений в истории
-MAX_HISTORY = 8
+MAX_HISTORY = int(os.getenv("MAX_HISTORY", "8"))
+
+# Таймаут сессии (секунды)
+SESSION_TIMEOUT = int(os.getenv("SESSION_TIMEOUT", "1800"))
+
+# Путь к файлу статистики
+STATS_FILE = Path(__file__).resolve().parent / "user_stats.json"
 
 
 
@@ -84,7 +106,8 @@ def get_inline_menu() -> InlineKeyboardMarkup:
 
 
 # ЗАГРУЗКА БАЗЫ ИНТЕНТОВ
-with open("intents.json", "r", encoding="utf-8") as f:
+_intents_path = Path(__file__).resolve().parent / "intents.json"
+with open(_intents_path, "r", encoding="utf-8") as f:
     intents_data = json.load(f)
 
 intents_list = intents_data["intents"]
@@ -94,9 +117,6 @@ intent_map = {intent["tag"]: intent for intent in intents_list}
 # ========================================
 # СИСТЕМА СБОРА СТАТИСТИКИ ПОЛЬЗОВАТЕЛЕЙ
 # ========================================
-
-# Файл для хранения статистики
-STATS_FILE = "user_stats.json"
 
 # Словарь для хранения активных сеансов (в оперативной памяти)
 # Ключ - user_id, значение - время начала сеанса
@@ -130,7 +150,7 @@ def load_stats() -> dict:
         }
     except json.JSONDecodeError:
         # Если файл поврежден, создаем новую структуру
-        print("⚠️ Файл статистики поврежден, создаю новый")
+        logger.warning("Файл статистики повреждён — создаю новый")
         return {
             "users": {},
             "global_stats": {
@@ -158,7 +178,7 @@ def save_stats(stats: dict):
         with open(STATS_FILE, "w", encoding="utf-8") as f:
             json.dump(stats, f, ensure_ascii=False, indent=2)
     except Exception as e:
-        print(f"❌ Ошибка сохранения статистики: {e}")
+        logger.error("Ошибка сохранения статистики: %s", e)
 
 
 def initialize_user(stats: dict, user_id: int, username: str, first_name: str):
@@ -196,7 +216,7 @@ def initialize_user(stats: dict, user_id: int, username: str, first_name: str):
         # Увеличиваем счетчик глобальных пользователей
         stats["global_stats"]["total_users"] += 1
         
-        print(f"✅ Инициализирован новый пользователь: {user_id} ({first_name})")
+        logger.info("Новый пользователь: %s (%s)", user_id, first_name)
 
 
 def start_session(user_id: int):
@@ -214,7 +234,7 @@ def start_session(user_id: int):
     active_sessions[user_id] = {
         "start_time": time.time()
     }
-    print(f"🚀 Начат сеанс для пользователя {user_id}")
+    logger.info("Сеанс начат: %s", user_id)
 
 
 def end_session(stats: dict, user_id: int):
@@ -238,7 +258,7 @@ def end_session(stats: dict, user_id: int):
         # Удаляем из активных сеансов
         del active_sessions[user_id]
         
-        print(f"🏁 Завершен сеанс для пользователя {user_id}. Продолжительность: {round(duration/60, 2)} минут")
+        logger.info("Сеанс завершён: %s (%.2f мин)", user_id, duration / 60)
 
 
 def track_message(stats: dict, user_id: int, is_ai: bool = False):
@@ -296,7 +316,7 @@ def add_satisfaction_rating(stats: dict, user_id: int, rating: int):
             "timestamp": datetime.now().isoformat()
         })
         
-        print(f"⭐ Получена оценка {rating}/10 от пользователя {user_id}")
+        logger.info("Оценка %d/10 от пользователя %s", rating, user_id)
         save_stats(stats)
 
 
@@ -317,7 +337,6 @@ def check_session_timeout(stats: dict):
     ВАЖНО: Эта функция будет вызываться при каждом новом сообщении,
     чтобы автоматически закрывать забытые сеансы.
     """
-    SESSION_TIMEOUT = 1800  # 30 минут в секундах
     current_time = time.time()
     
     sessions_to_end = []
@@ -330,7 +349,7 @@ def check_session_timeout(stats: dict):
     # Завершаем устаревшие сеансы
     for user_id in sessions_to_end:
         end_session(stats, user_id)
-        print(f"⏰ Автоматически завершен неактивный сеанс пользователя {user_id}")
+        logger.info("Авто-завершён неактивный сеанс: %s", user_id)
 
 
 
@@ -373,11 +392,9 @@ def find_best_intent(user_message: str) -> str | None:
 
 
 # ФУНКЦИЯ AI-ГЕНЕРАЦИИ ОТВЕТОВ
-def get_ai_response(user_id: int, user_message: str) -> str:
-    """
-    Генерирует ответ с помощью AI модели Meta-Llama 3.3 70B.
-    """
-    if not AI_ENABLED:
+async def get_ai_response(user_id: int, user_message: str) -> str:
+    """Генерирует ответ с помощью AI модели Meta-Llama 3.3 70B (async)."""
+    if not AI_ENABLED or ai_client is None:
         return "AI недоступен. Используйте команды из базы."
 
     try:
@@ -392,14 +409,16 @@ def get_ai_response(user_id: int, user_message: str) -> str:
         if len(conversation_history[user_id]) > MAX_HISTORY * 2:
             conversation_history[user_id] = conversation_history[user_id][-MAX_HISTORY * 2:]
 
-        system_prompt = """Ты Пандора - эмпатичный психолог-терапевт.
-Слушай внимательно, задавай открытые вопросы, поддерживай и помогай решить проблему.
-Отвечай кратко (2-3 предложения), по-доброму, на русском.
-Используй контекст предыдущих сообщений."""
+        system_prompt = (
+            "Ты Пандора — эмпатичный психолог-терапевт.\n"
+            "Слушай внимательно, задавай открытые вопросы, поддерживай и помогай решить проблему.\n"
+            "Отвечай кратко (2-3 предложения), по-доброму, на русском.\n"
+            "Используй контекст предыдущих сообщений."
+        )
 
         messages = [{"role": "system", "content": system_prompt}] + conversation_history[user_id]
 
-        response = ai_client.chat.completions.create(
+        response = await ai_client.chat.completions.create(
             model=AI_MODEL,
             messages=messages,
             temperature=0.7,
@@ -416,7 +435,7 @@ def get_ai_response(user_id: int, user_message: str) -> str:
         return ai_answer
 
     except Exception as e:
-        print(f"Ошибка AI: {e}")
+        logger.exception("Ошибка AI для пользователя %s", user_id)
         return "Извините, возникла техническая проблема. Попробуйте ещё раз."
 
 
@@ -783,7 +802,7 @@ async def handle_message(message: types.Message):
         response = random.choice(intent_map[tag]["responses"])
     else:
         if AI_ENABLED:
-            response = get_ai_response(user_id, user_text)
+            response = await get_ai_response(user_id, user_text)
             used_ai = True
         else:
             fallback = intent_map.get("нет_ответа", {"responses": ["Извините, я не понял."]})
@@ -802,12 +821,7 @@ async def main():
     """
     Точка входа в приложение.
     """
-    print("🤖 Пандора - бот запущен")
-
-    if AI_ENABLED:
-        print("✓ AI режим активен")
-    else:
-        print("⚠ AI выключен, работаем с intents.json")
+    logger.info("🤖 Пандора — бот запускается (AI=%s)", AI_ENABLED)
 
     await dp.start_polling(bot)
 
