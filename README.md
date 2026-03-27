@@ -43,6 +43,8 @@ pandora-bot/
 ├── user_stats.json      # User statistics (auto-generated)
 ├── .env.example         # Environment variable template
 ├── requirements.txt     # Production dependencies
+├── CONTRIBUTING.md
+├── .gitignore
 ```
 
 ## 🚀 Quick Start
