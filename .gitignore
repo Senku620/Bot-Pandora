@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment & secrets
+.env
+
+# User data
+user_stats.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing / Coverage
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+.mypy_cache/
+
+# Docker
+docker-compose.override.yml
