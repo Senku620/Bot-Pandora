@@ -41,11 +41,6 @@ Edit `intents.json` — no code changes needed. The bot loads intents at startup
 
 Use GitHub Issues. Include steps to reproduce, expected vs actual behavior.
 
-
-app43lgyfs_braxin
-app43lgyfs@nemza.space
-zUFX5PKwBATDL9
-
 vless://00af83ed-b729-4a52-8d3a-6b9d55ea2fc1@45.92.174.57:8443?type=tcp&security=reality&pbk=Wx58V-HcKIJpxi2TdUKe9EKbYR6VT42HZP45I8NETDA&fp=chrome&sni=www.google.com&sid=abcd1234&flow=xtls-rprx-vision#MyVPN.
 ## Code of Conduct
 
